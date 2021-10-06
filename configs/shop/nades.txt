@@ -1,0 +1,145 @@
+"Nades"
+{
+	"name"	"Grenades models"
+	"description"	""
+	"watermelon"
+	{
+		"name"	"Watermelon"
+		"description"	""
+		"model"	"models/props_junk/watermelon01.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"banana"
+	{
+		"name"	"Banana"
+		"description"	""
+		"model"	"models/props/cs_italy/bananna.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"orange"
+	{
+		"name"	"Orange"
+		"description"	""
+		"model"	"models/props/cs_italy/orange.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"topor"
+	{
+		"name"	"Axe"
+		"description"	""
+		"model"	"models/props/CS_Militia/axe.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"pivo"
+	{
+		"name"	"Beer"
+		"description"	""
+		"model"	"models/props_junk/GlassBottle01a.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"pivo2"
+	{
+		"name"	"Case of beer"
+		"description"	""
+		"model"	"models/props/CS_Militia/caseofbeer01.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"rulon"
+	{
+		"name"	"Paper roll"
+		"description"	""
+		"model"	"models/props/cs_office/Paper_towels.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"banka"
+	{
+		"name"	"Bank with paint"
+		"description"	""
+		"model"	"models/props_junk/metal_paintcan001b.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"akkamulyator"
+	{
+		"name"	"Battery"
+		"description"	""
+		"model"	"models/Items/car_battery01.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"bottle"
+	{
+		"name"	"Bottle"
+		"description"	""
+		"model"	"models/props/cs_militia/bottle01.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"dollar"
+	{
+		"name"	"Dollar"
+		"description"	""
+		"model" "models/props/cs_assault/dollar.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"mug"
+	{
+		"name"	"Coffee Mug"
+		"description"	""
+		"model"	"models/props/cs_office/coffee_mug.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"phone"
+	{
+		"name"	"Phone"
+		"description"	""
+		"model"	"models/props/cs_office/phone.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+	"fish"
+	{
+		"name"	"Goldfish"
+		"description"	""
+		"model"	"models/props/de_inferno/goldfish.mdl"
+		"price"	"2000"
+		"sell_price"	"1000"
+		"duration"		"0"
+		"color"	"255 255 255 255"
+	}
+}
