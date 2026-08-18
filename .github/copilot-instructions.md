@@ -10,8 +10,8 @@ This repository contains a **SourceMod plugin** for Source engine games that pro
 ### Core Technologies
 - **Language**: SourcePawn (.sp files)
 - **Platform**: SourceMod 1.11.0+ (Source engine games like CS:GO, CS:S, TF2)
-- **Build System**: SourceKnight (sourceknight.yaml configuration)
-- **Compiler**: SourcePawn compiler (spcomp) via SourceKnight
+- **Build System**: Native GitHub Actions (.github/workflows/ci.yml)
+- **Compiler**: SourcePawn compiler (spcomp), installed via rumblefrog/setup-sp
 
 ### Dependencies
 - **SourceMod**: Version 1.11.0-git6934 or newer
@@ -26,8 +26,7 @@ addons/sourcemod/
 └── configs/shop/
     ├── nades.txt              # Item definitions and prices
     └── nades_downloads.txt    # Download requirements (currently empty)
-sourceknight.yaml              # Build configuration and dependencies
-.github/workflows/ci.yml       # Automated CI/CD pipeline
+.github/workflows/ci.yml       # Automated CI/CD pipeline (build, tag, release)
 ```
 
 ## Code Style & Standards
@@ -79,8 +78,8 @@ char sNadeMdl[MAXPLAYERS+1][PLATFORM_MAX_PATH];
 
 ### Building the Plugin
 ```bash
-# Using SourceKnight (recommended)
-sourceknight build
+# Built automatically via GitHub Actions (.github/workflows/ci.yml)
+# on every push/PR, using rumblefrog/setup-sp
 
 # Manual compilation (if needed)
 spcomp -i addons/sourcemod/scripting/include addons/sourcemod/scripting/Shop_Nades.sp
