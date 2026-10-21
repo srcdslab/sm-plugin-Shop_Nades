@@ -5,11 +5,11 @@
 #include <sdkhooks>
 #include <shop>
 
-#define PLUGIN_VERSION	"2.0.0"
+#define PLUGIN_VERSION	"2.0.1"
 
 #define CATEGORY	"nades"
 
-new Handle:kv;
+new KeyValues:kv;
 new String:sNadeMdl[MAXPLAYERS+1][PLATFORM_MAX_PATH];
 
 public Plugin:myinfo =
@@ -44,80 +44,80 @@ public OnPluginEnd()
 
 public Shop_Started()
 {
-	if (kv == INVALID_HANDLE) OnMapStart();
+	if (kv == null) OnMapStart();
 	
 	decl String:buffer[64], String:desc[64];
-	KvGetString(kv, "name", buffer, sizeof(buffer));
-	KvGetString(kv, "description", desc, sizeof(desc));
+	kv.GetString("name", buffer, sizeof(buffer));
+	kv.GetString("description", desc, sizeof(desc));
 	
 	new CategoryId:category_id = Shop_RegisterCategory(CATEGORY, buffer, desc);
 	
 	decl String:item[64], String:model[PLATFORM_MAX_PATH];
-	if (KvGotoFirstSubKey(kv))
+	if (kv.GotoFirstSubKey())
 	{
 		do 
 		{
-			if (KvGetSectionName(kv, item, sizeof(item)))
+			if (kv.GetSectionName(item, sizeof(item)))
 			{
-				KvGetString(kv, "model", model, sizeof(model));
+				kv.GetString("model", model, sizeof(model));
 				new pos = FindCharInString(model, '.', true);
 				if (pos != -1 && StrEqual(model[pos+1], "mdl", false) && Shop_StartItem(category_id, item))
 				{
-					KvGetString(kv, "name", buffer, sizeof(buffer), item);
-					KvGetString(kv, "description", desc, sizeof(desc));
+					kv.GetString("name", buffer, sizeof(buffer), item);
+					kv.GetString("description", desc, sizeof(desc));
 					
-					Shop_SetInfo(buffer, desc, KvGetNum(kv, "price", 5000), KvGetNum(kv, "sell_price", 2500), Item_Togglable, KvGetNum(kv, "duration", 86400));
+					Shop_SetInfo(buffer, desc, kv.GetNum("price", 5000), kv.GetNum("sell_price", 2500), Item_Togglable, kv.GetNum("duration", 86400));
 					Shop_SetCallbacks(_, OnEquipItem);
 					
-					if (KvJumpToKey(kv, "attributes"))
+					if (kv.JumpToKey("attributes"))
 					{
 						Shop_KvCopySubKeysCustomInfo(view_as<KeyValues>(kv));
-						KvGoBack(kv);
+						kv.GoBack();
 					}
 					
-					Shop_SetCustomInfo("level", KvGetNum(kv, "level", 0));
+					Shop_SetCustomInfo("level", kv.GetNum("level", 0));
 					Shop_EndItem();
 					
 					PrecacheModel(model, true);
 				}
 			}
-		} while (KvGotoNextKey(kv));
+		} while (kv.GotoNextKey());
 	}
 	
-	KvRewind(kv);
+	kv.Rewind();
 }
 
 public OnMapStart()
 {
 	decl String:buffer[PLATFORM_MAX_PATH];
-	if (kv != INVALID_HANDLE)
+	if (kv != null)
 	{
-		CloseHandle(kv);
+		delete kv;
 	}
 	
-	kv = CreateKeyValues("Nades");
+	kv = new KeyValues("Nades");
 	
 	Shop_GetCfgFile(buffer, sizeof(buffer), "nades.txt");
 	
-	if (!FileToKeyValues(kv, buffer))
+	if (!kv.ImportFromFile(buffer))
 	{
 		SetFailState("Couldn't parse file %s", buffer);
 	}
-	KvRewind(kv);
-	if (KvGotoFirstSubKey(kv))
+	kv.Rewind();
+	if (kv.GotoFirstSubKey())
 	{
 		do
 		{
-			KvGetString(kv, "model", buffer, sizeof(buffer));
+			kv.GetString("model", buffer, sizeof(buffer));
 			new pos = FindCharInString(buffer, '.', true);
 			if (pos != -1 && StrEqual(buffer[pos+1], "mdl", false))
 			{
 				PrecacheModel(buffer, true);
 			}
-		} while (KvGotoNextKey(kv));
+		} while (kv.GotoNextKey());
 	}
 	
-	KvRewind(kv);
+	kv.Rewind();
 	
 	Shop_GetCfgFile(buffer, sizeof(buffer), "nades_downloads.txt");
 	File_ReadDownloadList(buffer);
@@ -134,10 +134,10 @@ public ShopAction:OnEquipItem(client, CategoryId:category_id, const String:categ
 	
 	Shop_ToggleClientCategoryOff(client, category_id);
 	
-	if (KvJumpToKey(kv, item, false))
+	if (kv.JumpToKey(item, false))
 	{
-		KvGetString(kv, "model", sNadeMdl[client], sizeof(sNadeMdl[]));
-		KvRewind(kv);
+		kv.GetString("model", sNadeMdl[client], sizeof(sNadeMdl[]));
+		kv.Rewind();
 		
 		if (!sNadeMdl[client][0])
 		{
@@ -212,9 +212,9 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 	else if (recursive && DirExists(path)) {
 
 		decl String:dirEntry[PLATFORM_MAX_PATH];
-		new Handle:__dir = OpenDirectory(path);
+		new DirectoryListing:__dir = OpenDirectory(path);
 
-		while (ReadDirEntry(__dir, dirEntry, sizeof(dirEntry))) {
+		while (__dir.GetNext(dirEntry, sizeof(dirEntry))) {
 
 			if (StrEqual(dirEntry, ".") || StrEqual(dirEntry, "..")) {
 				continue;
@@ -224,7 +224,7 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 			File_AddToDownloadsTable(dirEntry, recursive, ignoreExts, size);
 		}
 		
-		CloseHandle(__dir);
+		delete __dir;
 	}
 	else if (FindCharInString(path, '*', true)) {
 		
@@ -242,8 +242,8 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 			File_GetFileName(path, fileName, sizeof(fileName));
 			StrCat(fileName, sizeof(fileName), ".");
 
-			new Handle:__dir = OpenDirectory(dirName);
-			while (ReadDirEntry(__dir, dirEntry, sizeof(dirEntry))) {
+			new DirectoryListing:__dir = OpenDirectory(dirName);
+			while (__dir.GetNext(dirEntry, sizeof(dirEntry))) {
 
 				if (StrEqual(dirEntry, ".") || StrEqual(dirEntry, "..")) {
 					continue;
@@ -255,7 +255,7 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 				}
 			}
 
-			CloseHandle(__dir);
+			delete __dir;
 		}
 	}
 
@@ -264,15 +264,15 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 
 stock bool:File_ReadDownloadList(const String:path[])
 {
-	new Handle:file = OpenFile(path, "r");
+	new File:file = OpenFile(path, "r");
 	
-	if (file  == INVALID_HANDLE) {
+	if (file  == null) {
 		return false;
 	}
 
 	new String:buffer[PLATFORM_MAX_PATH];
-	while (!IsEndOfFile(file)) {
-		ReadFileLine(file, buffer, sizeof(buffer));
+	while (!file.EndOfFile()) {
+		file.ReadLine(buffer, sizeof(buffer));
 		
 		new pos;
 		pos = StrContains(buffer, "//");
@@ -299,7 +299,7 @@ stock bool:File_ReadDownloadList(const String:path[])
 		File_AddToDownloadsTable(buffer);
 	}
 
-	CloseHandle(file);
+	delete file;
 	
 	return true;
 }
