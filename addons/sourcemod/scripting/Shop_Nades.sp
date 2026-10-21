@@ -1,18 +1,19 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #include <sourcemod>
 #include <sdktools>
 #include <sdkhooks>
 #include <shop>
 
-#define PLUGIN_VERSION	"2.0.0"
+#define PLUGIN_VERSION	"2.0.1"
 
 #define CATEGORY	"nades"
 
-new Handle:kv;
-new String:sNadeMdl[MAXPLAYERS+1][PLATFORM_MAX_PATH];
+KeyValues kv;
+char sNadeMdl[MAXPLAYERS+1][PLATFORM_MAX_PATH];
 
-public Plugin:myinfo =
+public Plugin myinfo =
 {
 	name = "[Shop] Nades",
 	author = "FrozDark (HLModders LLC)",
@@ -21,14 +22,14 @@ public Plugin:myinfo =
 	url = "http://www.hlmod.ru/"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	RegAdminCmd("nades_reload", Command_Reload, ADMFLAG_ROOT, "Reloads nades configuration");
 	
 	if (Shop_IsStarted()) Shop_Started();
 }
 
-public Action:Command_Reload(client, args)
+public Action Command_Reload(int client, int args)
 {
 	OnPluginEnd();
 	if (Shop_IsStarted()) Shop_Started();
@@ -37,93 +38,93 @@ public Action:Command_Reload(client, args)
 	return Plugin_Handled;
 }
 
-public OnPluginEnd()
+public void OnPluginEnd()
 {
 	Shop_UnregisterMe();
 }
 
-public Shop_Started()
+public void Shop_Started()
 {
-	if (kv == INVALID_HANDLE) OnMapStart();
+	if (kv == null) OnMapStart();
 	
-	decl String:buffer[64], String:desc[64];
-	KvGetString(kv, "name", buffer, sizeof(buffer));
-	KvGetString(kv, "description", desc, sizeof(desc));
+	char buffer[64], desc[64];
+	kv.GetString("name", buffer, sizeof(buffer));
+	kv.GetString("description", desc, sizeof(desc));
 	
-	new CategoryId:category_id = Shop_RegisterCategory(CATEGORY, buffer, desc);
+	CategoryId category_id = Shop_RegisterCategory(CATEGORY, buffer, desc);
 	
-	decl String:item[64], String:model[PLATFORM_MAX_PATH];
-	if (KvGotoFirstSubKey(kv))
+	char item[64], model[PLATFORM_MAX_PATH];
+	if (kv.GotoFirstSubKey())
 	{
 		do 
 		{
-			if (KvGetSectionName(kv, item, sizeof(item)))
+			if (kv.GetSectionName(item, sizeof(item)))
 			{
-				KvGetString(kv, "model", model, sizeof(model));
-				new pos = FindCharInString(model, '.', true);
+				kv.GetString("model", model, sizeof(model));
+				int pos = FindCharInString(model, '.', true);
 				if (pos != -1 && StrEqual(model[pos+1], "mdl", false) && Shop_StartItem(category_id, item))
 				{
-					KvGetString(kv, "name", buffer, sizeof(buffer), item);
-					KvGetString(kv, "description", desc, sizeof(desc));
+					kv.GetString("name", buffer, sizeof(buffer), item);
+					kv.GetString("description", desc, sizeof(desc));
 					
-					Shop_SetInfo(buffer, desc, KvGetNum(kv, "price", 5000), KvGetNum(kv, "sell_price", 2500), Item_Togglable, KvGetNum(kv, "duration", 86400));
+					Shop_SetInfo(buffer, desc, kv.GetNum("price", 5000), kv.GetNum("sell_price", 2500), Item_Togglable, kv.GetNum("duration", 86400));
 					Shop_SetCallbacks(_, OnEquipItem);
 					
-					if (KvJumpToKey(kv, "attributes"))
+					if (kv.JumpToKey("attributes"))
 					{
 						Shop_KvCopySubKeysCustomInfo(view_as<KeyValues>(kv));
-						KvGoBack(kv);
+						kv.GoBack();
 					}
 					
-					Shop_SetCustomInfo("level", KvGetNum(kv, "level", 0));
+					Shop_SetCustomInfo("level", kv.GetNum("level", 0));
 					Shop_EndItem();
 					
 					PrecacheModel(model, true);
 				}
 			}
-		} while (KvGotoNextKey(kv));
+		} while (kv.GotoNextKey());
 	}
 	
-	KvRewind(kv);
+	kv.Rewind();
 }
 
-public OnMapStart()
+public void OnMapStart()
 {
-	decl String:buffer[PLATFORM_MAX_PATH];
-	if (kv != INVALID_HANDLE)
+	char buffer[PLATFORM_MAX_PATH];
+	if (kv != null)
 	{
-		CloseHandle(kv);
+		delete kv;
 	}
 	
-	kv = CreateKeyValues("Nades");
+	kv = new KeyValues("Nades");
 	
 	Shop_GetCfgFile(buffer, sizeof(buffer), "nades.txt");
 	
-	if (!FileToKeyValues(kv, buffer))
+	if (!kv.ImportFromFile(buffer))
 	{
 		SetFailState("Couldn't parse file %s", buffer);
 	}
-	KvRewind(kv);
-	if (KvGotoFirstSubKey(kv))
+	kv.Rewind();
+	if (kv.GotoFirstSubKey())
 	{
 		do
 		{
-			KvGetString(kv, "model", buffer, sizeof(buffer));
-			new pos = FindCharInString(buffer, '.', true);
+			kv.GetString("model", buffer, sizeof(buffer));
+			int pos = FindCharInString(buffer, '.', true);
 			if (pos != -1 && StrEqual(buffer[pos+1], "mdl", false))
 			{
 				PrecacheModel(buffer, true);
 			}
-		} while (KvGotoNextKey(kv));
+		} while (kv.GotoNextKey());
 	}
 	
-	KvRewind(kv);
+	kv.Rewind();
 	
 	Shop_GetCfgFile(buffer, sizeof(buffer), "nades_downloads.txt");
 	File_ReadDownloadList(buffer);
 }
 
-public ShopAction:OnEquipItem(client, CategoryId:category_id, const String:category[], ItemId:item_id, const String:item[], bool:isOn, bool:elapsed)
+public ShopAction OnEquipItem(int client, CategoryId category_id, const char[] category, ItemId item_id, const char[] item, bool isOn, bool elapsed)
 {
 	if (isOn || elapsed)
 	{
@@ -134,10 +135,10 @@ public ShopAction:OnEquipItem(client, CategoryId:category_id, const String:categ
 	
 	Shop_ToggleClientCategoryOff(client, category_id);
 	
-	if (KvJumpToKey(kv, item, false))
+	if (kv.JumpToKey(item, false))
 	{
-		KvGetString(kv, "model", sNadeMdl[client], sizeof(sNadeMdl[]));
-		KvRewind(kv);
+		kv.GetString("model", sNadeMdl[client], sizeof(sNadeMdl[]));
+		kv.Rewind();
 		
 		if (!sNadeMdl[client][0])
 		{
@@ -153,12 +154,12 @@ public ShopAction:OnEquipItem(client, CategoryId:category_id, const String:categ
 	return Shop_Raw;
 }
 
-public OnClientDisconnect_Post(client)
+public void OnClientDisconnect_Post(int client)
 {
 	sNadeMdl[client][0] = '\0';
 }
 
-public OnEntityCreated(entity, const String:classname[])
+public void OnEntityCreated(int entity, const char[] classname)
 {
 	if (!strcmp(classname, "hegrenade_projectile"))
 	{
@@ -166,13 +167,13 @@ public OnEntityCreated(entity, const String:classname[])
 	}
 }
 
-public OnHeSpawned(entity)
+public void OnHeSpawned(int entity)
 {
 	if (GetEntProp(entity, Prop_Data, "m_nNextThinkTick") == -1)
 	{
 		return;
 	}
-	new client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if (0<client<=MaxClients && sNadeMdl[client][0])
 	{
 		SetEntityModel(entity, sNadeMdl[client]);
@@ -181,8 +182,8 @@ public OnHeSpawned(entity)
 
 
 
-new String:_smlib_empty_twodimstring_array[][] = { { '\0' } };
-stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const String:ignoreExts[][]=_smlib_empty_twodimstring_array, size=0)
+char _smlib_empty_twodimstring_array[][] = { { '\0' } };
+stock void File_AddToDownloadsTable(const char[] path, bool recursive=true, const char[][] ignoreExts=_smlib_empty_twodimstring_array, int size=0)
 {
 	if (path[0] == '\0') {
 		return;
@@ -190,7 +191,7 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 
 	if (FileExists(path)) {
 		
-		decl String:fileExtension[4];
+		char fileExtension[4];
 		File_GetExtension(path, fileExtension, sizeof(fileExtension));
 		
 		if (StrEqual(fileExtension, "bz2", false) || StrEqual(fileExtension, "ztmp", false)) {
@@ -211,10 +212,10 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 	
 	else if (recursive && DirExists(path)) {
 
-		decl String:dirEntry[PLATFORM_MAX_PATH];
-		new Handle:__dir = OpenDirectory(path);
+		char dirEntry[PLATFORM_MAX_PATH];
+		DirectoryListing __dir = OpenDirectory(path);
 
-		while (ReadDirEntry(__dir, dirEntry, sizeof(dirEntry))) {
+		while (__dir.GetNext(dirEntry, sizeof(dirEntry))) {
 
 			if (StrEqual(dirEntry, ".") || StrEqual(dirEntry, "..")) {
 				continue;
@@ -224,26 +225,23 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 			File_AddToDownloadsTable(dirEntry, recursive, ignoreExts, size);
 		}
 		
-		CloseHandle(__dir);
+		delete __dir;
 	}
 	else if (FindCharInString(path, '*', true)) {
 		
-		new String:fileExtension[4];
+		char fileExtension[4];
 		File_GetExtension(path, fileExtension, sizeof(fileExtension));
 
 		if (StrEqual(fileExtension, "*")) {
 
-			decl
-				String:dirName[PLATFORM_MAX_PATH],
-				String:fileName[PLATFORM_MAX_PATH],
-				String:dirEntry[PLATFORM_MAX_PATH];
+			char dirName[PLATFORM_MAX_PATH], fileName[PLATFORM_MAX_PATH], dirEntry[PLATFORM_MAX_PATH];
 
 			File_GetDirName(path, dirName, sizeof(dirName));
 			File_GetFileName(path, fileName, sizeof(fileName));
 			StrCat(fileName, sizeof(fileName), ".");
 
-			new Handle:__dir = OpenDirectory(dirName);
-			while (ReadDirEntry(__dir, dirEntry, sizeof(dirEntry))) {
+			DirectoryListing __dir = OpenDirectory(dirName);
+			while (__dir.GetNext(dirEntry, sizeof(dirEntry))) {
 
 				if (StrEqual(dirEntry, ".") || StrEqual(dirEntry, "..")) {
 					continue;
@@ -255,26 +253,26 @@ stock File_AddToDownloadsTable(const String:path[], bool:recursive=true, const S
 				}
 			}
 
-			CloseHandle(__dir);
+			delete __dir;
 		}
 	}
 
 	return;
 }
 
-stock bool:File_ReadDownloadList(const String:path[])
+stock bool File_ReadDownloadList(const char[] path)
 {
-	new Handle:file = OpenFile(path, "r");
+	File file = OpenFile(path, "r");
 	
-	if (file  == INVALID_HANDLE) {
+	if (file  == null) {
 		return false;
 	}
 
-	new String:buffer[PLATFORM_MAX_PATH];
-	while (!IsEndOfFile(file)) {
-		ReadFileLine(file, buffer, sizeof(buffer));
+	char buffer[PLATFORM_MAX_PATH];
+	while (!file.EndOfFile()) {
+		file.ReadLine(buffer, sizeof(buffer));
 		
-		new pos;
+		int pos;
 		pos = StrContains(buffer, "//");
 		if (pos != -1) {
 			buffer[pos] = '\0';
@@ -299,14 +297,14 @@ stock bool:File_ReadDownloadList(const String:path[])
 		File_AddToDownloadsTable(buffer);
 	}
 
-	CloseHandle(file);
+	delete file;
 	
 	return true;
 }
 
-stock File_GetExtension(const String:path[], String:buffer[], size)
+stock void File_GetExtension(const char[] path, char[] buffer, int size)
 {
-	new extpos = FindCharInString(path, '.', true);
+	int extpos = FindCharInString(path, '.', true);
 	
 	if (extpos == -1)
 	{
@@ -317,9 +315,9 @@ stock File_GetExtension(const String:path[], String:buffer[], size)
 	strcopy(buffer, size, path[++extpos]);
 }
 
-stock Math_GetRandomInt(min, max)
+stock int Math_GetRandomInt(int min, int max)
 {
-	new random = GetURandomInt();
+	int random = GetURandomInt();
 	
 	if (random == 0)
 		random++;
@@ -327,13 +325,13 @@ stock Math_GetRandomInt(min, max)
 	return RoundToCeil(float(random) / (float(2147483647) / float(max - min + 1))) + min - 1;
 }
 
-stock Array_FindString(const String:array[][], size, const String:str[], bool:caseSensitive=true, start=0)
+stock int Array_FindString(const char[][] array, int size, const char[] str, bool caseSensitive=true, int start=0)
 {
 	if (start < 0) {
 		start = 0;
 	}
 
-	for (new i=start; i < size; i++) {
+	for (int i=start; i < size; i++) {
 
 		if (StrEqual(array[i], str, caseSensitive)) {
 			return i;
@@ -343,7 +341,7 @@ stock Array_FindString(const String:array[][], size, const String:str[], bool:ca
 	return -1;
 }
 
-stock bool:File_GetFileName(const String:path[], String:buffer[], size)
+stock void File_GetFileName(const char[] path, char[] buffer, int size)
 {	
 	if (path[0] == '\0') {
 		buffer[0] = '\0';
@@ -352,21 +350,21 @@ stock bool:File_GetFileName(const String:path[], String:buffer[], size)
 	
 	File_GetBaseName(path, buffer, size);
 	
-	new pos_ext = FindCharInString(buffer, '.', true);
+	int pos_ext = FindCharInString(buffer, '.', true);
 
 	if (pos_ext != -1) {
 		buffer[pos_ext] = '\0';
 	}
 }
 
-stock bool:File_GetDirName(const String:path[], String:buffer[], size)
+stock void File_GetDirName(const char[] path, char[] buffer, int size)
 {	
 	if (path[0] == '\0') {
 		buffer[0] = '\0';
 		return;
 	}
 	
-	new pos_start = FindCharInString(path, '/', true);
+	int pos_start = FindCharInString(path, '/', true);
 	
 	if (pos_start == -1) {
 		pos_start = FindCharInString(path, '\\', true);
@@ -381,14 +379,14 @@ stock bool:File_GetDirName(const String:path[], String:buffer[], size)
 	buffer[pos_start] = '\0';
 }
 
-stock bool:File_GetBaseName(const String:path[], String:buffer[], size)
+stock void File_GetBaseName(const char[] path, char[] buffer, int size)
 {	
 	if (path[0] == '\0') {
 		buffer[0] = '\0';
 		return;
 	}
 	
-	new pos_start = FindCharInString(path, '/', true);
+	int pos_start = FindCharInString(path, '/', true);
 	
 	if (pos_start == -1) {
 		pos_start = FindCharInString(path, '\\', true);
