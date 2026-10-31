@@ -6,7 +6,7 @@
 #include <sdkhooks>
 #include <shop>
 
-#define PLUGIN_VERSION	"2.0.1"
+#define PLUGIN_VERSION	"2.0.2"
 
 #define CATEGORY	"nades"
 
@@ -24,6 +24,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("Shop_Nades.phrases");
+
 	RegAdminCmd("nades_reload", Command_Reload, ADMFLAG_ROOT, "Reloads nades configuration");
 	
 	if (Shop_IsStarted()) Shop_Started();
@@ -34,7 +36,7 @@ public Action Command_Reload(int client, int args)
 	OnPluginEnd();
 	if (Shop_IsStarted()) Shop_Started();
 	OnMapStart();
-	ReplyToCommand(client, "Nades configuration successfuly reloaded!");
+	ReplyToCommand(client, "%t", "Nades Config Reloaded");
 	return Plugin_Handled;
 }
 
@@ -142,14 +144,14 @@ public ShopAction OnEquipItem(int client, CategoryId category_id, const char[] c
 		
 		if (!sNadeMdl[client][0])
 		{
-			PrintToChat(client, "Failed to use \"%s\"!.", item);
+			PrintToChat(client, "%t", "Failed To Use Item", item);
 			return Shop_Raw;
 		}
 		
 		return Shop_UseOn;
 	}
 	
-	PrintToChat(client, "Failed to use \"%s\"!.", item);
+	PrintToChat(client, "%t", "Failed To Use Item", item);
 	
 	return Shop_Raw;
 }
