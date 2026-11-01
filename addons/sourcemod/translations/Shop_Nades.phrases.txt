@@ -1,0 +1,24 @@
+"Phrases"
+{
+	"Nades Config Reloaded"
+	{
+		"en"		"Nades configuration successfully reloaded!"
+		"fr"		"Configuration des nades rechargée avec succès !"
+		"ru"		"Конфигурация гранат успешно перезагружена!"
+		"es"		"¡Configuración de granadas recargada correctamente!"
+		"de"		"Granaten-Konfiguration erfolgreich neu geladen!"
+		"pt"		"Configuração de granadas recarregada com sucesso!"
+		"chi"		"手雷配置已成功重新加载！"
+	}
+	"Failed To Use Item"
+	{
+		"#format"	"{1:s}"
+		"en"		"Failed to use \"{1}\"!"
+		"fr"		"Impossible d'utiliser \"{1}\" !"
+		"ru"		"Не удалось использовать \"{1}\"!"
+		"es"		"¡No se pudo usar \"{1}\"!"
+		"de"		"\"{1}\" konnte nicht verwendet werden!"
+		"pt"		"Não foi possível usar \"{1}\"!"
+		"chi"		"无法使用“{1}”！"
+	}
+}
