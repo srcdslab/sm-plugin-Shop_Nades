@@ -6,7 +6,7 @@
 #include <sdkhooks>
 #include <shop>
 
-#define PLUGIN_VERSION	"2.0.2"
+#define PLUGIN_VERSION	"2.0.3"
 
 #define CATEGORY	"nades"
 
