@@ -9,6 +9,12 @@
 		"de"		"Granaten-Konfiguration erfolgreich neu geladen!"
 		"pt"		"Configuração de granadas recarregada com sucesso!"
 		"chi"		"手雷配置已成功重新加载！"
+		"pl"		"Konfiguracja granatów została pomyślnie przeładowana!"
+		"tr"		"El bombası yapılandırması başarıyla yeniden yüklendi!"
+		"it"		"Configurazione delle granate ricaricata con successo!"
+		"ua"		"Конфігурацію гранат успішно перезавантажено!"
+		"zho"		"手雷設定已成功重新載入！"
+		"cze"		"Konfigurace granátů byla úspěšně znovu načtena!"
 	}
 	"Failed To Use Item"
 	{
@@ -20,5 +26,11 @@
 		"de"		"\"{1}\" konnte nicht verwendet werden!"
 		"pt"		"Não foi possível usar \"{1}\"!"
 		"chi"		"无法使用“{1}”！"
+		"pl"		"Nie udało się użyć \"{1}\"!"
+		"tr"		"\"{1}\" kullanılamadı!"
+		"it"		"Impossibile usare \"{1}\"!"
+		"ua"		"Не вдалося використати \"{1}\"!"
+		"zho"		"無法使用「{1}」！"
+		"cze"		"Nepodařilo se použít \"{1}\"!"
 	}
 }
